@@ -1,16 +1,16 @@
 package com.app.weather.controllers;
 
 
-import com.app.weather.dto.request.CidadeRequestDto;
-import com.app.weather.mapper.CidadeMapper;
+import com.app.weather.dto.CidadeDto;
+import com.app.weather.entities.Cidade;
+import com.app.weather.exceptions.CidadeNaoEncontradaException;
 import com.app.weather.services.CidadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -21,8 +21,20 @@ public class CidadeController {
     private CidadeService cidadeService;
 
     @PostMapping
-    public ResponseEntity<CidadeRequestDto> salvarCidade(@RequestBody CidadeRequestDto dto) {
-        CidadeRequestDto cidade = cidadeService.salvarCidade(dto);
+    public ResponseEntity<CidadeDto> salvarCidade(@RequestBody CidadeDto dto) {
+        CidadeDto cidade = cidadeService.salvarCidade(dto);
         return new ResponseEntity<>(cidade, HttpStatus.CREATED);
     }
+
+    @GetMapping("/{nomeCidade}")
+    public ResponseEntity<List<CidadeDto>> buscarCidade(@PathVariable("nomeCidade") String nomeCidade) {
+        nomeCidade = nomeCidade.replace("-", " ");
+        List<CidadeDto> cidadesDto = cidadeService.buscarCidade(nomeCidade);
+        if (!cidadesDto.isEmpty()) {
+            return ResponseEntity.ok(cidadesDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
