@@ -14,8 +14,7 @@ import java.util.Optional;
 @Repository
 public interface CidadeRepository extends JpaRepository<Cidade, Long> {
 
-    @Query("SELECT c FROM Cidade c WHERE c.nomeCidade = :nomeCidade AND c.dataCadastro = :dataCadastro")
-    List<Cidade> findByDataCadastroAndNomeCidade(@Param("dataCadastro") LocalDateTime dataCadastro, @Param("nomeCidade") String nomeCidade);
+    List<Cidade> findByDataCadastroAndNomeCidade(LocalDateTime dataCadastro, String nomeCidade);
 
-    List<Cidade> findByDataCadastroBetween(LocalDateTime dataInicio, LocalDateTime dataFim);
+    List<Cidade> findByNomeCidadeAndDataCadastroBetween(String nomeCidade, LocalDateTime dataInicio, LocalDateTime dataFim);
 }

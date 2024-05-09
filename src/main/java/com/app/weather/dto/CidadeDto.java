@@ -22,5 +22,4 @@ public class CidadeDto {
     private int precipitacao;
     private int humidade;
     private int velocidadeDoVento;
-
 }
