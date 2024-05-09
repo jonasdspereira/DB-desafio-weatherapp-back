@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class CidadeDto {
+    private Long id;
     private String nomeCidade;
     private LocalDateTime dataCadastro;
     private CidadeTurno cidadeTurno;
@@ -22,4 +22,5 @@ public class CidadeDto {
     private int precipitacao;
     private int humidade;
     private int velocidadeDoVento;
+
 }
