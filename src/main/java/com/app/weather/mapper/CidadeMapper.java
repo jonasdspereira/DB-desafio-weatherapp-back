@@ -9,10 +9,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CidadeMapper {
-    CidadeMapper MAPPER = Mappers.getMapper(CidadeMapper.class);
-
-    CidadeDto toDto (Cidade cidade);
-
-    Cidade toEntity (CidadeDto cidadeDto);
-
+    CidadeDto toDto(Cidade cidade);
+    Cidade toEntity(CidadeDto cidadeDto);
 }

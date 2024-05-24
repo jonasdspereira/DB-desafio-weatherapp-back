@@ -1,11 +1,12 @@
 package com.app.weather.controllers;
 
-
 import com.app.weather.dto.CidadeDto;
-import com.app.weather.exceptions.DadosMeteorologicosException;
-import com.app.weather.exceptions.DadosMeteorologicosNaoInformadosException;
+import com.app.weather.enums.CidadeTempo;
+import com.app.weather.enums.CidadeTurno;
+import com.app.weather.exceptions.CamposDosDadosMeteorologicosNaoInformadosException;
 import com.app.weather.services.impl.CidadeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -13,231 +14,124 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 class CidadeControllerTest {
-
-    @Mock
-    private CidadeServiceImpl cidadeService;
 
     @InjectMocks
     private CidadeController cidadeController;
 
+    @Mock
+    private CidadeServiceImpl cidadeService;
+
+    private CidadeDto cidadeDto;
+
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
+    void setup() {
+        MockitoAnnotations.openMocks(this);
+
+        cidadeDto = CidadeDto.builder()
+                .nomeCidade("Manaus")
+                .dataCadastro(LocalDate.now())
+                .cidadeTurno(CidadeTurno.NOITE)
+                .cidadeTempo(CidadeTempo.LIMPO)
+                .temperaturaMaxima(30)
+                .temperaturaMinima(20)
+                .precipitacao(5)
+                .umidade(60)
+                .velocidadeDoVento(120)
+                .build();
     }
 
     @Test
-    void salvarDadosMeteorologicos_Successo() throws DadosMeteorologicosException {
-        CidadeDto cidadeDto = new CidadeDto();
-        when(cidadeService.salvarDadosMeteorologicos(cidadeDto)).thenReturn(cidadeDto);
+    @DisplayName("Deve salvar um dado meteorológico com sucesso")
+    void deveSalvarDadoMeteorologicoComSucesso() {
+        // Arrange
+        when(cidadeService.salvarDadosMeteorologicos(any(CidadeDto.class))).thenReturn(cidadeDto);
 
-        ResponseEntity<Object> responseEntity = cidadeController.salvarDadosMeteorologicos(cidadeDto);
+        // Act
+        ResponseEntity<CidadeDto> response = cidadeController.salvarDadosMeteorologicos(cidadeDto);
 
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-        assertEquals(cidadeDto, responseEntity.getBody());
-        verify(cidadeService, times(1)).salvarDadosMeteorologicos(cidadeDto);
+        // Assert
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(cidadeDto, response.getBody());
     }
 
     @Test
-    void salvarDadosMeteorologicos_Exception() {
+    @DisplayName("Não deve salvar um dado meteorológico quando o nome da cidade estiver vazio")
+    void naoDeveSalvarDadoMeteorologicoComNomeCidadeVazio() {
+        // Arrange
+        CidadeDto cidadeDtoInvalido = CidadeDto.builder().build();
+        when(cidadeService.salvarDadosMeteorologicos(any(CidadeDto.class)))
+                .thenThrow(new CamposDosDadosMeteorologicosNaoInformadosException("O nome da cidade não pode estar vazio."));
 
-        CidadeDto cidadeDto = new CidadeDto();
-        when(cidadeService.salvarDadosMeteorologicos(cidadeDto)).thenThrow(new DadosMeteorologicosException("Mensagem de erro"));
-
-
-        ResponseEntity<Object> responseEntity = cidadeController.salvarDadosMeteorologicos(cidadeDto);
-
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-
-        assertEquals("Erro ao salvar dados meteorológicos: Mensagem de erro", responseEntity.getBody());
+        // Act & Assert
+        assertThrows(CamposDosDadosMeteorologicosNaoInformadosException.class, () -> {
+            cidadeController.salvarDadosMeteorologicos(cidadeDtoInvalido);
+        });
     }
 
     @Test
-    void buscarPrevisaoAtual_Ok() throws DadosMeteorologicosNaoInformadosException {
-        String nomeCidade = "Manaus";
-        when(cidadeService.buscarPrevisaoAtual(nomeCidade)).thenReturn(Collections.singletonList(new CidadeDto()));
+    @DisplayName("Deve buscar previsão atual com sucesso")
+    void deveBuscarPrevisaoAtualComSucesso() {
+        // Arrange
+        when(cidadeService.buscarPrevisaoAtual(anyString())).thenReturn(cidadeDto);
 
-        ResponseEntity<List<CidadeDto>> responseEntity = cidadeController.buscarPrevisaoAtual(nomeCidade);
+        // Act
+        ResponseEntity<CidadeDto> response = cidadeController.buscarPrevisaoAtual("Manaus");
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        verify(cidadeService, times(1)).buscarPrevisaoAtual(nomeCidade);
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(cidadeDto, response.getBody());
     }
 
     @Test
-    void buscarPrevisaoAtual_NotFound() throws DadosMeteorologicosNaoInformadosException {
-        String nomeCidade = "Manaus";
-        when(cidadeService.buscarPrevisaoAtual(nomeCidade)).thenReturn(Collections.emptyList());
+    @DisplayName("Deve buscar previsão para os próximos 7 dias com sucesso")
+    void deveBuscarPrevisao7DiasComSucesso() {
+        // Arrange
+        List<CidadeDto> previsoes = Collections.singletonList(cidadeDto);
+        when(cidadeService.buscarPrevisao7Dias(anyString())).thenReturn(previsoes);
 
-        ResponseEntity<List<CidadeDto>> responseEntity = cidadeController.buscarPrevisaoAtual(nomeCidade);
+        // Act
+        ResponseEntity<List<CidadeDto>> response = cidadeController.buscarPrevisao7Dias("Manaus");
 
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        verify(cidadeService, times(1)).buscarPrevisaoAtual(nomeCidade);
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(previsoes, response.getBody());
     }
 
     @Test
-    void buscarPrevisaoAtual_Exception() throws DadosMeteorologicosNaoInformadosException {
+    @DisplayName("Deve alterar dados meteorológicos com sucesso")
+    void deveAlterarDadosMeteorologicosComSucesso() {
+        // Arrange
+        when(cidadeService.alterarDadosMeteorologicos(any(Long.class), any(CidadeDto.class))).thenReturn(cidadeDto);
 
-        String nomeCidade = "Nome da Cidade";
-        when(cidadeService.buscarPrevisaoAtual(nomeCidade)).thenThrow(new DadosMeteorologicosNaoInformadosException("Mensagem de erro"));
+        // Act
+        ResponseEntity<CidadeDto> response = cidadeController.alterarDadosMeteorologicos(1L, cidadeDto);
 
-        ResponseEntity<List<CidadeDto>> responseEntity = cidadeController.buscarPrevisaoAtual(nomeCidade);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(cidadeDto, response.getBody());
     }
 
     @Test
-    void buscarPrevisao7Dias_Ok() throws DadosMeteorologicosNaoInformadosException {
-        String nomeCidade = "Manaus";
-        when(cidadeService.buscarPrevisao7Dias(nomeCidade)).thenReturn(Collections.singletonList(new CidadeDto()));
+    @DisplayName("Deve excluir dados meteorológicos com sucesso")
+    void deveExcluirDadosMeteorologicosComSucesso() {
+        // Arrange
+        doNothing().when(cidadeService).excluirDadosMeteorologicos(any(Long.class));
 
-        ResponseEntity<List<CidadeDto>> responseEntity = cidadeController.buscarPrevisao7Dias(nomeCidade);
+        // Act
+        ResponseEntity<Void> response = cidadeController.excluirDadosMeteorologicos(1L);
 
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        verify(cidadeService, times(1)).buscarPrevisao7Dias(nomeCidade);
+        // Assert
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
-
-    @Test
-    void buscarPrevisao7Dias_NotFound() throws DadosMeteorologicosNaoInformadosException {
-        String nomeCidade = "Manaus";
-        when(cidadeService.buscarPrevisao7Dias(nomeCidade)).thenReturn(Collections.emptyList());
-
-        ResponseEntity<List<CidadeDto>> responseEntity = cidadeController.buscarPrevisao7Dias(nomeCidade);
-
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        verify(cidadeService, times(1)).buscarPrevisao7Dias(nomeCidade);
-    }
-
-    @Test
-    void buscarPrevisao7Dias_Exception() throws DadosMeteorologicosNaoInformadosException {
-
-        String nomeCidade = "Nome da Cidade";
-        when(cidadeService.buscarPrevisao7Dias(nomeCidade)).thenThrow(new DadosMeteorologicosNaoInformadosException("Mensagem de erro"));
-
-        ResponseEntity<List<CidadeDto>> responseEntity = cidadeController.buscarPrevisao7Dias(nomeCidade);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
-    }
-
-    @Test
-    void alterarDadosMeteorologicos_Successo() throws DadosMeteorologicosNaoInformadosException {
-
-        Long id = 1L;
-        CidadeDto dto = new CidadeDto();
-        dto.setId(id);
-
-        CidadeDto cidadeDtoAtualizado = new CidadeDto();
-        cidadeDtoAtualizado.setId(id);
-        when(cidadeService.alterarDadosMeteorologicos(dto)).thenReturn(cidadeDtoAtualizado);
-
-        ResponseEntity<Object> responseEntity = cidadeController.alterarDadosMeteorologicos(id, dto);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(cidadeDtoAtualizado, responseEntity.getBody());
-        verify(cidadeService, times(1)).alterarDadosMeteorologicos(dto);
-    }
-
-    @Test
-    void alterarDadosMeteorologicos_IfDtoNull() {
-
-        Long id = 1L;
-        CidadeDto dto = null;
-
-        ResponseEntity<Object> responseEntity = cidadeController.alterarDadosMeteorologicos(id, dto);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals("Erro ao atualizar dados meteorológicos: ID do dado meteorológico não foi informado", responseEntity.getBody());
-        verifyNoInteractions(cidadeService);
-    }
-
-    @Test
-    void alterarDadosMeteorologicos_IfIdNotMatch() {
-
-        Long id = 1L;
-        CidadeDto dto = new CidadeDto();
-        dto.setId(2L);
-
-        ResponseEntity<Object> responseEntity = cidadeController.alterarDadosMeteorologicos(id, dto);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals("Erro ao atualizar dados meteorológicos: O ID dos dados meteorológicos não corresponde ao ID fornecido na URL", responseEntity.getBody());
-        verifyNoInteractions(cidadeService);
-    }
-
-    @Test
-    void alterarDadosMeteorologicos_TryCatch_Success() throws DadosMeteorologicosNaoInformadosException {
-
-        Long id = 1L;
-        CidadeDto dto = new CidadeDto();
-        dto.setId(id);
-
-
-        CidadeDto cidadeDtoAtualizado = new CidadeDto();
-        cidadeDtoAtualizado.setId(id);
-        when(cidadeService.alterarDadosMeteorologicos(dto)).thenReturn(cidadeDtoAtualizado);
-
-        ResponseEntity<Object> responseEntity = cidadeController.alterarDadosMeteorologicos(id, dto);
-
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(cidadeDtoAtualizado, responseEntity.getBody());
-        verify(cidadeService, times(1)).alterarDadosMeteorologicos(dto);
-    }
-
-    @Test
-    void alterarDadosMeteorologicos_TryCatch_Exception() throws DadosMeteorologicosNaoInformadosException {
-
-        Long id = 1L;
-        CidadeDto dto = new CidadeDto();
-        dto.setId(id);
-
-
-        when(cidadeService.alterarDadosMeteorologicos(dto)).thenThrow(new DadosMeteorologicosNaoInformadosException("Erro ao atualizar dados meteorológicos"));
-
-        ResponseEntity<Object> responseEntity = cidadeController.alterarDadosMeteorologicos(id, dto);
-
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals("Erro ao atualizar dados meteorológicos: Erro ao atualizar dados meteorológicos", responseEntity.getBody());
-        verify(cidadeService, times(1)).alterarDadosMeteorologicos(dto);
-    }
-
-    @Test
-    void excluirDadosMeteorologicos_TryCatch_Success() throws DadosMeteorologicosNaoInformadosException {
-
-        Long id = 1L;
-
-        ResponseEntity<Object> responseEntity = cidadeController.excluirDadosMeteorologicos(id);
-
-        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
-        assertNull(responseEntity.getBody());
-        verify(cidadeService, times(1)).excluirDadosMeteorologicos(id);
-    }
-
-    @Test
-    void excluirDadosMeteorologicos_TryCatch_Exception() throws DadosMeteorologicosNaoInformadosException {
-
-        Long id = 1L;
-
-        doThrow(new DadosMeteorologicosNaoInformadosException("Dados meteorológicos não encontrados")).when(cidadeService).excluirDadosMeteorologicos(id);
-
-        ResponseEntity<Object> responseEntity = cidadeController.excluirDadosMeteorologicos(id);
-
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
-        assertEquals("Erro ao excluir dados meteorológicos: Dados meteorológicos não encontrados", responseEntity.getBody());
-        verify(cidadeService, times(1)).excluirDadosMeteorologicos(id);
-    }
-
-
-
-
 }
