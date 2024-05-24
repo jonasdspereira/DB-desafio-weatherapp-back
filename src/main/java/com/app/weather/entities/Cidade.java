@@ -7,36 +7,37 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter @Setter
 public class Cidade {
 
     @GeneratedValue
     @Id
     private Long id;
 
-    @NotEmpty(message = "Nome da cidade deve ser informado")
+    @NotEmpty(message = "O nome da cidade não pode estar vazio.")
     @Size(min = 2, max = 30)
     private String nomeCidade;
-    private LocalDateTime dataCadastro;
-
+    @NotNull(message = "A data da previsão não pode estar vazia.")
+    private LocalDate dataCadastro;
     @Enumerated(EnumType.STRING)
     private CidadeTurno cidadeTurno;
-
     @Enumerated(EnumType.STRING)
     private CidadeTempo cidadeTempo;
-
+    @NotNull(message = "A temperatura não pode ser nula.")
     private int temperaturaMaxima;
+    @NotNull(message = "A temperatura não pode ser nula.")
     private int temperaturaMinima;
+    @NotNull(message = "A precipitação não pode ser nula.")
     private int precipitacao;
-    private int humidade;
+    @NotNull(message = "A umidade não pode ser nula.")
+    private int umidade;
+    @NotNull(message = "A velocidade do vento não pode ser nulo.")
     private int velocidadeDoVento;
 }

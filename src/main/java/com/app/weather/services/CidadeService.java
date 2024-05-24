@@ -1,22 +1,24 @@
 package com.app.weather.services;
 
 import com.app.weather.dto.CidadeDto;
-import com.app.weather.exceptions.DadosMeteorologicosException;
-import com.app.weather.exceptions.DadosMeteorologicosNaoInformadosException;
+import com.app.weather.entities.Cidade;
 
 import java.util.List;
 
 public interface CidadeService {
 
-    CidadeDto salvarDadosMeteorologicos (CidadeDto cidadeDto) throws DadosMeteorologicosException;
+    CidadeDto salvarDadosMeteorologicos (CidadeDto cidadeDto);
 
-    List<CidadeDto> buscarPrevisaoAtual (String nomeCidade) throws DadosMeteorologicosNaoInformadosException;
+    CidadeDto buscarPrevisaoAtual (String nomeCidade);
 
-    List<CidadeDto> buscarPrevisao7Dias(String nomeCidade) throws DadosMeteorologicosNaoInformadosException;
+    List<CidadeDto> buscarPrevisao7Dias(String nomeCidade);
 
-    CidadeDto alterarDadosMeteorologicos(CidadeDto cidadeDto) throws DadosMeteorologicosNaoInformadosException;
+    CidadeDto alterarDadosMeteorologicos(Long id, CidadeDto cidadeDto);
 
-    void excluirDadosMeteorologicos(Long id) throws DadosMeteorologicosNaoInformadosException;
+    void excluirDadosMeteorologicos(Long id);
+
+    Cidade buscar(Long id);
+
 }
 
 
