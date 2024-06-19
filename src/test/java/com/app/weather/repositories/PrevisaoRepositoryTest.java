@@ -1,8 +1,8 @@
 package com.app.weather.repositories;
 
-import com.app.weather.entities.Cidade;
-import com.app.weather.enums.CidadeTempo;
-import com.app.weather.enums.CidadeTurno;
+import com.app.weather.entities.Previsao;
+import com.app.weather.enums.PrevisaoTempo;
+import com.app.weather.enums.PrevisaoTurno;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,58 +18,53 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
-class CidadeRepositoryTest {
+class PrevisaoRepositoryTest {
 
     @Autowired
-    private CidadeRepository cidadeRepository;
+    private PrevisaoRepository previsaoRepository;
 
-    private Cidade cidade;
+    private Previsao previsao;
 
     @BeforeEach
     void setup() {
-        cidade = Cidade.builder()
+        previsao = Previsao.builder()
                 .nomeCidade("Manaus")
                 .dataCadastro(LocalDate.now())
-                .cidadeTurno(CidadeTurno.NOITE)
-                .cidadeTempo(CidadeTempo.LIMPO)
+                .previsaoTurno(PrevisaoTurno.NOITE)
+                .previsaoTempo(PrevisaoTempo.LIMPO)
                 .temperaturaMaxima(30)
                 .temperaturaMinima(20)
                 .precipitacao(5)
                 .umidade(60)
                 .velocidadeDoVento(120)
                 .build();
-        cidadeRepository.save(cidade);
+        previsaoRepository.save(previsao);
     }
 
     @Test
     @DisplayName("Deve encontrar uma cidade pelo nome e data de cadastro")
     void deveEncontrarCidadePorNomeEDataCadastro() {
-        // Arrange
         LocalDate dataCadastro = LocalDate.now();
         String nomeCidade = "Manaus";
 
-        // Act
-        Optional<Cidade> foundCidade = cidadeRepository.findByDataCadastroAndNomeCidade(dataCadastro, nomeCidade);
+        Optional<Previsao> resultado = previsaoRepository.findByDataCadastroAndNomeCidade(dataCadastro, nomeCidade);
 
-        // Assert
-        assertThat(foundCidade).isPresent();
-        assertThat(foundCidade.get().getNomeCidade()).isEqualTo(nomeCidade);
-        assertThat(foundCidade.get().getDataCadastro()).isEqualTo(dataCadastro);
+        assertThat(resultado).isPresent();
+        assertThat(resultado.get().getNomeCidade()).isEqualTo(nomeCidade);
+        assertThat(resultado.get().getDataCadastro()).isEqualTo(dataCadastro);
     }
 
     @Test
     @DisplayName("Deve encontrar cidades pelo nome e intervalo de datas")
     void deveEncontrarCidadesPorNomeEIntervaloDeDatas() {
-        // Arrange
+
         String nomeCidade = "Manaus";
         LocalDate dataInicio = LocalDate.now().minusDays(1);
         LocalDate dataFim = LocalDate.now().plusDays(1);
 
-        // Act
-        List<Cidade> foundCidades = cidadeRepository.findByNomeCidadeAndDataCadastroBetween(nomeCidade, dataInicio, dataFim);
+        List<Previsao> resultado = previsaoRepository.findByNomeCidadeAndDataCadastroBetween(nomeCidade, dataInicio, dataFim);
 
-        // Assert
-        assertThat(foundCidades).isNotEmpty();
-        assertThat(foundCidades).contains(cidade);
+        assertThat(resultado).isNotEmpty();
+        assertThat(resultado).contains(previsao);
     }
 }

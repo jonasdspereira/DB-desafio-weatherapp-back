@@ -1,6 +1,6 @@
 package com.app.weather.enums;
 
-public enum CidadeTempo {
+public enum PrevisaoTempo {
     LIMPO,
     PACIALMENTE_NUBLADO,
     NUBLADO,
