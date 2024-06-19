@@ -1,17 +1,19 @@
 package com.app.weather.exceptions;
 
-import com.app.weather.controllers.CidadeController;
-import com.app.weather.dto.CidadeDto;
-import com.app.weather.services.impl.CidadeServiceImpl;
+import com.app.weather.controllers.PrevisaoController;
+import com.app.weather.dto.PrevisaoDto;
+import com.app.weather.services.impl.PrevisaoServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -19,14 +21,16 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(CidadeController.class)
+@DataJpaTest
+@ActiveProfiles("test")
+@WebMvcTest(PrevisaoController.class)
 public class GlobalExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CidadeServiceImpl cidadeService;
+    private PrevisaoServiceImpl cidadeService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -40,7 +44,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Deve retornar BAD_REQUEST quando CamposDosDadosMeteorologicosNaoInformadosException for lançada")
     void deveRetornarBadRequestQuandoCamposDosDadosMeteorologicosNaoInformadosExceptionForLancada() throws Exception {
-        Mockito.when(cidadeService.salvarDadosMeteorologicos(Mockito.any(CidadeDto.class)))
+        Mockito.when(cidadeService.salvarDadosMeteorologicos(Mockito.any(PrevisaoDto.class)))
                 .thenThrow(new CamposDosDadosMeteorologicosNaoInformadosException("O nome da cidade não pode estar vazio."));
 
         mockMvc.perform(post("/previsao")
