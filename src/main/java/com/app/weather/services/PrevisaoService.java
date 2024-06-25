@@ -9,11 +9,11 @@ public interface PrevisaoService {
 
     PrevisaoDto salvarDadosMeteorologicos (PrevisaoDto previsaoDto);
 
-    List<PrevisaoDto> buscarPrevisoes(String nomeCidade);
+    List<PrevisaoDto> buscarPrevisoes();
 
-    PrevisaoDto buscarPrevisaoAtual (String nomeCidade);
+    List<PrevisaoDto> buscarPrevisao(Long id);
 
-    List<PrevisaoDto> buscarPrevisao7Dias(String nomeCidade);
+    List<PrevisaoDto> buscarPrevisaoPeloNome(String nomeCidade);
 
     PrevisaoDto alterarDadosMeteorologicos(Long id, PrevisaoDto previsaoDto);
 

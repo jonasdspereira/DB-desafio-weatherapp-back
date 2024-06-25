@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record PrevisaoDto(
+        Long id,
         @NotEmpty(message = "O nome da cidade não pode estar vazio.")
         String nomeCidade,
         @NotNull(message = "A data da previsão não pode estar vazia.")
@@ -31,8 +32,8 @@ public record PrevisaoDto(
         @NotNull(message = "A velocidade do vento não pode ser nula.")
         int velocidadeDoVento
 ) {
-    public static PrevisaoDto criarPrevisao(String nomeCidade, LocalDate dataCadastro, PrevisaoTurno previsaoTurno, PrevisaoTempo previsaoTempo,
+    public static PrevisaoDto criarPrevisao(Long id, String nomeCidade, LocalDate dataCadastro, PrevisaoTurno previsaoTurno, PrevisaoTempo previsaoTempo,
                                             int temperaturaMaxima, int temperaturaMinima, int precipitacao, int umidade, int velocidadeDoVento) {
-        return new PrevisaoDto(nomeCidade, dataCadastro, previsaoTurno, previsaoTempo, temperaturaMaxima, temperaturaMinima, precipitacao, umidade, velocidadeDoVento);
+        return new PrevisaoDto(id, nomeCidade, dataCadastro, previsaoTurno, previsaoTempo, temperaturaMaxima, temperaturaMinima, precipitacao, umidade, velocidadeDoVento);
     }
 }
