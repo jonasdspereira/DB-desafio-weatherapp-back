@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,37 +41,24 @@ public class PrevisaoServiceImpl implements PrevisaoService {
 
 
     @Override
-    public List<PrevisaoDto> buscarPrevisoes(String nomeCidade) {
-        String nomeCidadeFinal = nomeCidade.replace("-", " ");
-        List<Previsao> previsoes = previsaoRepository.findPrevisoesByNomeCidade(nomeCidadeFinal);
+    public List<PrevisaoDto> buscarPrevisoes() {
+        List<Previsao> previsoes = previsaoRepository.findAll();
 
-        if (previsoes.isEmpty()) {
-            throw new DadosMeteorologicosNaoInformadosException("Nenhuma previsão encontrada para a cidade: " + nomeCidadeFinal);
-        }
         return previsoes.stream()
                 .map(previsaoMapper::toDto)
                 .collect(Collectors.toList());
     }
 
 
-    @Override
-    public PrevisaoDto buscarPrevisaoAtual(String nomeCidade) {
-        String nomeCidadeFinal = nomeCidade.replace("-", " ");
-        LocalDate dataAtual = LocalDate.now();
-        Optional<Previsao> previsao = previsaoRepository.findByDataCadastroAndNomeCidade(dataAtual, nomeCidadeFinal);
+    public List<PrevisaoDto> buscarPrevisao(Long id) {
+        Optional<Previsao> previsao = previsaoRepository.findById(id);
         return previsao.map(previsaoMapper::toDto)
-                .orElseThrow(() -> new DadosMeteorologicosNaoInformadosException("Nenhuma previsão encontrada para a cidade: " + nomeCidadeFinal));
+                .map(Collections::singletonList)
+                .orElse(Collections.emptyList());
     }
 
-    @Override
-    public List<PrevisaoDto> buscarPrevisao7Dias(String nomeCidade) {
-        String nomeCidadeFinal = nomeCidade.replace("-", " ");
-        LocalDate hoje = LocalDate.now();
-        LocalDate umaSemana = hoje.plusDays(7);
-        List<Previsao> previsoes = previsaoRepository.findByNomeCidadeAndDataCadastroBetween(nomeCidadeFinal, hoje, umaSemana);
-        if (previsoes.isEmpty()) {
-            throw new DadosMeteorologicosNaoInformadosException("Nenhuma previsão encontrada para a cidade: " + nomeCidadeFinal);
-        }
+    public List<PrevisaoDto> buscarPrevisaoPeloNome(String nomeCidade) {
+        List<Previsao> previsoes = previsaoRepository.findByNomeCidade(nomeCidade);
         return previsoes.stream()
                 .map(previsaoMapper::toDto)
                 .collect(Collectors.toList());
@@ -95,8 +83,7 @@ public class PrevisaoServiceImpl implements PrevisaoService {
 
     @Override
     public void excluirDadosMeteorologicos(Long id) {
-        Previsao previsao = buscar(id);
-        previsaoRepository.delete(previsao);
+        previsaoRepository.deleteById(id);
 
     }
 

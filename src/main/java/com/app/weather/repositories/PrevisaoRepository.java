@@ -12,9 +12,5 @@ import java.util.Optional;
 @Repository
 public interface PrevisaoRepository extends JpaRepository<Previsao, Long> {
 
-    Optional<Previsao> findByDataCadastroAndNomeCidade(LocalDate dataCadastro, String nomeCidade);
-
-    List<Previsao> findByNomeCidadeAndDataCadastroBetween(String nomeCidade, LocalDate dataInicio, LocalDate dataFim);
-
-    List<Previsao> findPrevisoesByNomeCidade(String nomeCidade);
+    List<Previsao> findByNomeCidade(String nomeCidade);
 }

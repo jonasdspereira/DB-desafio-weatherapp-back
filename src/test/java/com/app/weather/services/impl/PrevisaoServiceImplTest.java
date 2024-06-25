@@ -61,7 +61,7 @@ class PrevisaoServiceImplTest {
                 .velocidadeDoVento(120)
                 .build();
 
-        previsaoDto = PrevisaoDto.criarPrevisao("Manaus", LocalDate.now(), PrevisaoTurno.NOITE, PrevisaoTempo.LIMPO, 30, 25, 50, 80, 120);
+        previsaoDto = PrevisaoDto.criarPrevisao(1L, "Manaus", LocalDate.now(), PrevisaoTurno.NOITE, PrevisaoTempo.LIMPO, 30, 25, 50, 80, 120);
         previsaoService = new PrevisaoServiceImpl(previsaoRepository, previsaoMapper);
     }
 
@@ -84,7 +84,7 @@ class PrevisaoServiceImplTest {
     @Test
     @DisplayName("Deve lançar exceção quando o nome da cidade não estiver informado")
     void deveLancarExcecaoQuandoNomeCidadeNaoInformado() {
-        PrevisaoDto previsaoDto = new PrevisaoDto("", LocalDate.now(), PrevisaoTurno.NOITE, PrevisaoTempo.LIMPO, 20,15,50,80,120 );
+        PrevisaoDto previsaoDto = new PrevisaoDto(1L,"", LocalDate.now(), PrevisaoTurno.NOITE, PrevisaoTempo.LIMPO, 20,15,50,80,120 );
 
         CamposDosDadosMeteorologicosNaoInformadosException exception = assertThrows(
                 CamposDosDadosMeteorologicosNaoInformadosException.class,
@@ -95,17 +95,7 @@ class PrevisaoServiceImplTest {
         verify(previsaoRepository, never()).save(any(Previsao.class));
     }
 
-    @Test
-    @DisplayName("Deve lançar exceção quando não encontrar previsão atual")
-    void deveLancarExcecaoQuandoNaoEncontrarPrevisaoAtual() {
-        when(previsaoRepository.findByDataCadastroAndNomeCidade(any(LocalDate.class), anyString())).thenReturn(Optional.empty());
 
-        DadosMeteorologicosNaoInformadosException exception = assertThrows(DadosMeteorologicosNaoInformadosException.class, () -> {
-            previsaoService.buscarPrevisaoAtual("Manaus");
-        });
-
-        assertEquals("Nenhuma previsão encontrada para a cidade: Manaus", exception.getMessage());
-    }
 
     @Test
     @DisplayName("Deve buscar previsão para os próximos 7 dias com sucesso")

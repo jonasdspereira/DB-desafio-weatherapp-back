@@ -30,7 +30,7 @@ public class GlobalExceptionHandlerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private PrevisaoServiceImpl cidadeService;
+    private PrevisaoServiceImpl previsaoService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -44,7 +44,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Deve retornar BAD_REQUEST quando CamposDosDadosMeteorologicosNaoInformadosException for lançada")
     void deveRetornarBadRequestQuandoCamposDosDadosMeteorologicosNaoInformadosExceptionForLancada() throws Exception {
-        Mockito.when(cidadeService.salvarDadosMeteorologicos(Mockito.any(PrevisaoDto.class)))
+        Mockito.when(previsaoService.salvarDadosMeteorologicos(Mockito.any(PrevisaoDto.class)))
                 .thenThrow(new CamposDosDadosMeteorologicosNaoInformadosException("O nome da cidade não pode estar vazio."));
 
         mockMvc.perform(post("/previsao")
@@ -59,7 +59,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Deve retornar NOT_FOUND quando DadosMeteorologicosNaoInformadosException for lançada")
     void deveRetornarNotFoundQuandoDadosMeteorologicosNaoInformadosExceptionForLancada() throws Exception {
-        Mockito.when(cidadeService.buscarPrevisaoAtual(Mockito.anyString()))
+        Mockito.when(previsaoService.buscarPrevisaoAtual(Mockito.anyString()))
                 .thenThrow(new DadosMeteorologicosNaoInformadosException("Nenhuma previsão encontrada para a cidade."));
 
         mockMvc.perform(get("/previsao/Manaus"))
@@ -71,7 +71,7 @@ public class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Deve retornar INTERNAL_SERVER_ERROR quando Exception genérica for lançada")
     void deveRetornarInternalServerErrorQuandoExceptionGenericaForLancada() throws Exception {
-        Mockito.when(cidadeService.buscarPrevisaoAtual(Mockito.anyString()))
+        Mockito.when(previsaoService.buscarPrevisaoAtual(Mockito.anyString()))
                 .thenThrow(new RuntimeException("Erro interno do servidor."));
 
         mockMvc.perform(get("/previsao/Manaus"))
