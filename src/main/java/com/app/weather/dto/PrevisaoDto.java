@@ -14,26 +14,30 @@ public record PrevisaoDto(
         Long id,
         @NotEmpty(message = "O nome da cidade não pode estar vazio.")
         String nomeCidade,
+
         @NotNull(message = "A data da previsão não pode estar vazia.")
-        @JsonFormat(pattern = "dd/MM/yyyy")
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
         LocalDate dataCadastro,
+
         @Enumerated(EnumType.STRING)
         PrevisaoTurno previsaoTurno,
+
         @Enumerated(EnumType.STRING)
         PrevisaoTempo previsaoTempo,
+
         @NotNull(message = "A temperatura não pode ser nula.")
-        int temperaturaMaxima,
+        Integer temperaturaMaxima,
+
         @NotNull(message = "A temperatura não pode ser nula.")
-        int temperaturaMinima,
+        Integer temperaturaMinima,
+
         @NotNull(message = "A precipitação não pode ser nula.")
-        int precipitacao,
+        Integer precipitacao,
+
         @NotNull(message = "A umidade não pode ser nula.")
-        int umidade,
+        Integer umidade,
+
         @NotNull(message = "A velocidade do vento não pode ser nula.")
-        int velocidadeDoVento
+        Integer velocidadeDoVento
 ) {
-    public static PrevisaoDto criarPrevisao(Long id, String nomeCidade, LocalDate dataCadastro, PrevisaoTurno previsaoTurno, PrevisaoTempo previsaoTempo,
-                                            int temperaturaMaxima, int temperaturaMinima, int precipitacao, int umidade, int velocidadeDoVento) {
-        return new PrevisaoDto(id, nomeCidade, dataCadastro, previsaoTurno, previsaoTempo, temperaturaMaxima, temperaturaMinima, precipitacao, umidade, velocidadeDoVento);
-    }
 }
