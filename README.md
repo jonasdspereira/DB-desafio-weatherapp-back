@@ -1,4 +1,4 @@
-# DB-desafio-weatherapp-back
+# DB - Desafio WeatherApp - backend
 
 Este é o repositório do backend da aplicação WeatherApp, responsável pela gestão das previsões meteorológicas.
 
