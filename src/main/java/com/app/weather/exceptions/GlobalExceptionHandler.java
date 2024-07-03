@@ -10,18 +10,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(CamposDosDadosMeteorologicosNaoInformadosException.class)
-    public ResponseEntity<ErrorDetails> handleCamposDosDadosMeteorologicosNaoInformadosException(CamposDosDadosMeteorologicosNaoInformadosException ex, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), request.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(DadosMeteorologicosNaoInformadosException.class)
-    public ResponseEntity<ErrorDetails> handleDadosMeteorologicosNaoInformadosException(DadosMeteorologicosNaoInformadosException ex, WebRequest request) {
-        ErrorDetails errorDetails = new ErrorDetails(HttpStatus.NOT_FOUND.value(), ex.getMessage(), request.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage(), request.getDescription(false));

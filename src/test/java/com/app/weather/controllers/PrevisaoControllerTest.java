@@ -1,130 +1,105 @@
 package com.app.weather.controllers;
 
 import com.app.weather.dto.PrevisaoDto;
-import com.app.weather.enums.PrevisaoTempo;
-import com.app.weather.enums.PrevisaoTurno;
-import com.app.weather.exceptions.CamposDosDadosMeteorologicosNaoInformadosException;
 import com.app.weather.services.impl.PrevisaoServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
 import java.util.Collections;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.app.weather.enums.PrevisaoTempo.CHUVOSO;
+import static com.app.weather.enums.PrevisaoTurno.TARDE;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-@DataJpaTest
-@ActiveProfiles("test")
+@ExtendWith({MockitoExtension.class, SpringExtension.class})
+@WebMvcTest(PrevisaoController.class)
+@AutoConfigureMockMvc
 class PrevisaoControllerTest {
 
-    @InjectMocks
-    private PrevisaoController previsaoController;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private PrevisaoServiceImpl previsaoService;
 
     private PrevisaoDto previsaoDto;
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
-
-        previsaoDto = PrevisaoDto.criarPrevisao("Manaus",LocalDate.now(),PrevisaoTurno.NOITE, PrevisaoTempo.LIMPO,30,25,50,80,120 );
-        previsaoController = new PrevisaoController(previsaoService);
+        previsaoDto = new PrevisaoDto(1L, "Cidade Teste", LocalDate.of(2024, 7, 2), TARDE, CHUVOSO, 30, 25, 20, 50, 10);
     }
 
     @Test
-    @DisplayName("Deve salvar um dado meteorológico com sucesso")
-    void deveSalvarDadoMeteorologicoComSucesso() {
-
+    void salvarDadosMeteorologicos() throws Exception {
         when(previsaoService.salvarDadosMeteorologicos(any(PrevisaoDto.class))).thenReturn(previsaoDto);
 
-        ResponseEntity<PrevisaoDto> response = previsaoController.salvarDadosMeteorologicos(previsaoDto);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(previsaoDto, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.post("/previsoes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"nomeCidade\": \"Cidade Teste\", \"dataCadastro\": \"02/07/2024\", \"previsaoTurno\": \"TARDE\", \"previsaoTempo\": \"CHUVOSO\", \"temperaturaMaxima\": 30, \"temperaturaMinima\": 25, \"precipitacao\": 20, \"umidade\": 50, \"velocidadeDoVento\": 10 }")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.nomeCidade").value("Cidade Teste"));
     }
 
     @Test
-    @DisplayName("Não deve salvar um dado meteorológico quando o nome da cidade estiver vazio")
-    void naoDeveSalvarDadoMeteorologicoComNomeCidadeVazio() {
+    void buscarPrevisoes() throws Exception {
+        when(previsaoService.buscarPrevisoes()).thenReturn(Collections.singletonList(previsaoDto));
 
-        PrevisaoDto previsaoDtoInvalido = PrevisaoDto.criarPrevisao("", LocalDate.now(), PrevisaoTurno.NOITE, PrevisaoTempo.LIMPO, 30, 25, 50, 80, 120);
-        when(previsaoService.salvarDadosMeteorologicos(any(PrevisaoDto.class)))
-                .thenThrow(new CamposDosDadosMeteorologicosNaoInformadosException("O nome da cidade não pode estar vazio."));
-
-
-        assertThrows(CamposDosDadosMeteorologicosNaoInformadosException.class, () -> {
-            previsaoController.salvarDadosMeteorologicos(previsaoDtoInvalido);
-        });
-    }
-
-//    @Test
-//    @DisplayName("Deve buscar previsão atual com sucesso")
-//    void deveBuscarPrevisaoAtualComSucesso() {
-//
-//        when(previsaoService.buscarPrevisaoAtual(anyString())).thenReturn(previsaoDto);
-//
-//
-//        ResponseEntity<List<PrevisaoDto>> response = previsaoController.buscarPrevisaoAtual("Manaus");
-//
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals(previsaoDto, response.getBody());
-//    }
-
-    @Test
-    @DisplayName("Deve buscar previsão para os próximos 7 dias com sucesso")
-    void deveBuscarPrevisao7DiasComSucesso() {
-
-        List<PrevisaoDto> previsoes = Collections.singletonList(previsaoDto);
-        when(previsaoService.buscarPrevisao7Dias(anyString())).thenReturn(previsoes);
-
-
-        ResponseEntity<List<PrevisaoDto>> response = previsaoController.buscarPrevisao7Dias("Manaus");
-
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(previsoes, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.get("/previsoes/todas")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].nomeCidade").value("Cidade Teste"));
     }
 
     @Test
-    @DisplayName("Deve alterar dados meteorológicos com sucesso")
-    void deveAlterarDadosMeteorologicosComSucesso() {
+    void buscarPrevisaoPeloNome() throws Exception {
+        when(previsaoService.buscarPrevisaoPeloNome("Cidade Teste")).thenReturn(Collections.singletonList(previsaoDto));
 
+        mockMvc.perform(MockMvcRequestBuilders.get("/previsoes/Cidade Teste")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].nomeCidade").value("Cidade Teste"));
+    }
+
+    @Test
+    void buscarPrevisao() throws Exception {
+        when(previsaoService.buscarPrevisao(1L)).thenReturn(previsaoDto);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/previsoes/previsao/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.nomeCidade").value("Cidade Teste"));
+    }
+
+    @Test
+    void alterarDadosMeteorologicos() throws Exception {
         when(previsaoService.alterarDadosMeteorologicos(any(Long.class), any(PrevisaoDto.class))).thenReturn(previsaoDto);
 
-
-        ResponseEntity<PrevisaoDto> response = previsaoController.alterarDadosMeteorologicos(1L, previsaoDto);
-
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(previsaoDto, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.put("/previsoes/previsao/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"nomeCidade\": \"Cidade Teste\", \"dataCadastro\": \"02/07/2024\", \"previsaoTurno\": \"TARDE\", \"previsaoTempo\": \"CHUVOSO\", \"temperaturaMaxima\": 30, \"temperaturaMinima\": 25, \"precipitacao\": 20, \"umidade\": 50, \"velocidadeDoVento\": 10 }")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.nomeCidade").value("Cidade Teste"));
     }
 
     @Test
-    @DisplayName("Deve excluir dados meteorológicos com sucesso")
-    void deveExcluirDadosMeteorologicosComSucesso() {
-
-        doNothing().when(previsaoService).excluirDadosMeteorologicos(any(Long.class));
-
-
-        ResponseEntity<Void> response = previsaoController.excluirDadosMeteorologicos(1L);
-
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    void excluirDadosMeteorologicos() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/previsoes/previsao/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
     }
 }

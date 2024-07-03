@@ -11,7 +11,7 @@ public interface PrevisaoService {
 
     List<PrevisaoDto> buscarPrevisoes();
 
-    List<PrevisaoDto> buscarPrevisao(Long id);
+    PrevisaoDto buscarPrevisao(Long id);
 
     List<PrevisaoDto> buscarPrevisaoPeloNome(String nomeCidade);
 
@@ -22,5 +22,4 @@ public interface PrevisaoService {
     Previsao buscar(Long id);
 
 }
-
 

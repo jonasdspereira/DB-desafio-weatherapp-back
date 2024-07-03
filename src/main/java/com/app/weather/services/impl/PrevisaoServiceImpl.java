@@ -4,14 +4,12 @@ import com.app.weather.dto.PrevisaoDto;
 import com.app.weather.entities.Previsao;
 import com.app.weather.exceptions.CamposDosDadosMeteorologicosNaoInformadosException;
 import com.app.weather.exceptions.DadosMeteorologicosNaoInformadosException;
+import com.app.weather.exceptions.PrevisaoNaoEncontradaException;
 import com.app.weather.mapper.PrevisaoMapper;
 import com.app.weather.repositories.PrevisaoRepository;
 import com.app.weather.services.PrevisaoService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,7 +20,7 @@ public class PrevisaoServiceImpl implements PrevisaoService {
     private final PrevisaoRepository previsaoRepository;
     private final PrevisaoMapper previsaoMapper;
 
-    @Autowired
+
     public PrevisaoServiceImpl(PrevisaoRepository previsaoRepository, PrevisaoMapper previsaoMapper) {
         this.previsaoRepository = previsaoRepository;
         this.previsaoMapper = previsaoMapper;
@@ -30,31 +28,40 @@ public class PrevisaoServiceImpl implements PrevisaoService {
 
     @Override
     public PrevisaoDto salvarDadosMeteorologicos(PrevisaoDto previsaoDto) {
-
-        Optional.ofNullable(previsaoDto.nomeCidade())
-                .filter(nome -> !nome.isEmpty())
-                .orElseThrow(() -> new CamposDosDadosMeteorologicosNaoInformadosException("O nome da cidade não pode estar vazio."));
-        Previsao previsao = previsaoMapper.toEntity(previsaoDto);
-        Previsao previsaoSalva = previsaoRepository.save(previsao);
-        return previsaoMapper.toDto(previsaoSalva);
+        try {
+            Optional.ofNullable(previsaoDto.nomeCidade())
+                    .filter(nome -> !nome.isEmpty())
+                    .orElseThrow(() -> new CamposDosDadosMeteorologicosNaoInformadosException("O nome da cidade não pode estar vazio."));
+            Previsao previsao = previsaoMapper.toEntity(previsaoDto);
+            Previsao previsaoSalva = previsaoRepository.save(previsao);
+            return previsaoMapper.toDto(previsaoSalva);
+        } catch (CamposDosDadosMeteorologicosNaoInformadosException e) {
+            throw e;
+        }
     }
 
 
     @Override
-    public List<PrevisaoDto> buscarPrevisoes() {
-        List<Previsao> previsoes = previsaoRepository.findAll();
+    public List<PrevisaoDto> buscarPrevisoes() throws PrevisaoNaoEncontradaException {
+        try {
+            List<Previsao> previsoes = previsaoRepository.findAll();
 
-        return previsoes.stream()
-                .map(previsaoMapper::toDto)
-                .collect(Collectors.toList());
+            if (previsoes.isEmpty()) {
+                throw new PrevisaoNaoEncontradaException("Nenhuma previsão encontrada.");
+            }
+
+            return previsoes.stream()
+                    .map(previsaoMapper::toDto)
+                    .collect(Collectors.toList());
+        } catch (PrevisaoNaoEncontradaException ex) {
+            throw ex;
+        }
     }
 
-
-    public List<PrevisaoDto> buscarPrevisao(Long id) {
-        Optional<Previsao> previsao = previsaoRepository.findById(id);
-        return previsao.map(previsaoMapper::toDto)
-                .map(Collections::singletonList)
-                .orElse(Collections.emptyList());
+    @Override
+    public PrevisaoDto buscarPrevisao(Long id) {
+        Previsao previsao = buscar(id);
+        return previsaoMapper.toDto(previsao);
     }
 
     public List<PrevisaoDto> buscarPrevisaoPeloNome(String nomeCidade) {
@@ -87,11 +94,8 @@ public class PrevisaoServiceImpl implements PrevisaoService {
 
     }
 
-    @Override
     public Previsao buscar(Long id) {
-
         return previsaoRepository.findById(id)
-                .orElseThrow(() -> new DadosMeteorologicosNaoInformadosException("Erro ao encontrar previsao com o id " + id));
-
+                .orElseThrow(() -> new PrevisaoNaoEncontradaException("Previsão não encontrada para o ID: " + id));
     }
 }

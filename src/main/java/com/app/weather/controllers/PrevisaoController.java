@@ -18,7 +18,6 @@ public class PrevisaoController {
 
     private final PrevisaoServiceImpl previsaoService;
 
-    @Autowired
     public PrevisaoController(PrevisaoServiceImpl cidadeService) {
         this.previsaoService = cidadeService;
     }
@@ -36,26 +35,26 @@ public class PrevisaoController {
     }
 
     @GetMapping("/{nomeCidade}")
-    public ResponseEntity<List<PrevisaoDto>> buscarPrevisaoPeloNome(@Valid @NotNull @PathVariable String nomeCidade) {
+    public ResponseEntity<List<PrevisaoDto>> buscarPrevisaoPeloNome(@Valid @NotNull @PathVariable("nomeCidade") String nomeCidade) {
         List<PrevisaoDto> previsoes = previsaoService.buscarPrevisaoPeloNome(nomeCidade);
         return ResponseEntity.ok().body(previsoes);
     }
 
     @GetMapping("/previsao/{id}")
-    public ResponseEntity<List<PrevisaoDto>> buscarPrevisao(@Valid @NotNull @PathVariable Long id) {
-        List<PrevisaoDto> previsoes = previsaoService.buscarPrevisao(id);
+    public ResponseEntity<PrevisaoDto> buscarPrevisao(@Valid @NotNull @PathVariable("id") Long id) {
+        PrevisaoDto previsoes = previsaoService.buscarPrevisao(id);
         return ResponseEntity.ok().body(previsoes);
     }
 
 
-    @PutMapping("/{nomeCidade}/{id}")
-    public ResponseEntity<PrevisaoDto> alterarDadosMeteorologicos(@PathVariable Long id, @Valid @NotNull @RequestBody PrevisaoDto dto) {
+    @PutMapping("/previsao/{id}")
+    public ResponseEntity<PrevisaoDto> alterarDadosMeteorologicos(@PathVariable("id") Long id, @Valid @NotNull @RequestBody PrevisaoDto dto) {
         PrevisaoDto previsaoAtualizada = previsaoService.alterarDadosMeteorologicos(id, dto);
         return ResponseEntity.ok(previsaoAtualizada);
     }
 
     @DeleteMapping("/previsao/{id}")
-    public ResponseEntity<Void> excluirDadosMeteorologicos(@PathVariable Long id) {
+    public ResponseEntity<Void> excluirDadosMeteorologicos(@PathVariable("id") Long id) {
         previsaoService.excluirDadosMeteorologicos(id);
         return ResponseEntity.noContent().build();
     }
