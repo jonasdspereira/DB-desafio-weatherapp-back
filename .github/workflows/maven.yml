@@ -27,7 +27,7 @@ jobs:
 
     env:
       DEV_DB_URL: jdbc:postgresql://localhost:5432/previsao
-      TEST_DB_URL: jdbc:postgresql://localhost:5432/previsao_teste
+      TEST_DB_URL: jdbc:postgresql://localhost:5432/previsao-teste
       POSTGRES_USER: postgres
       POSTGRES_PWD: postgres
 
@@ -62,7 +62,6 @@ jobs:
 
       - name: Run tests with Maven
         run: mvn test
-        continue-on-error: true
 
       - name: Archive test results
         if: failure()
