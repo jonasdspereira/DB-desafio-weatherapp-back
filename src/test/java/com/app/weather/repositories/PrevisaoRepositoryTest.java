@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,9 +40,12 @@ class PrevisaoRepositoryTest {
         previsao2 = criarPrevisao(new PrevisaoDto(2L, "São Paulo", LocalDate.of(2024, 7, 3), PrevisaoTurno.MANHA, PrevisaoTempo.LIMPO, 30, 20, 0, 2, 2));
     }
 
+    @Transactional
     @AfterEach
     void tearDown() {
-        entityManager.clear();
+        entityManager.remove(previsao1);
+        entityManager.remove(previsao2);
+        entityManager.flush();
     }
 
     @Test

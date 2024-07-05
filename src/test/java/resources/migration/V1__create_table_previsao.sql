@@ -12,3 +12,4 @@ CREATE TABLE previsao (
     velocidade_do_vento INT NOT NULL,
     CONSTRAINT CHK_nome_cidade CHECK (CHAR_LENGTH(nome_cidade) >= 2 AND CHAR_LENGTH(nome_cidade) <= 30)
 );
+
