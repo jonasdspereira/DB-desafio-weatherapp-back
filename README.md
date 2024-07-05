@@ -1,3 +1,5 @@
+[![Java CI with Maven](https://github.com/jonasdspereira/DB-desafio-weatherapp-back/actions/workflows/maven.yml/badge.svg)](https://github.com/jonasdspereira/DB-desafio-weatherapp-back/actions/workflows/maven.yml)
+
 # DB - Desafio WeatherApp - backend
 
 Este é o repositório do backend da aplicação WeatherApp, responsável pela gestão das previsões meteorológicas.
