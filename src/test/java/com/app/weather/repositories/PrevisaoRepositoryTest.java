@@ -4,7 +4,6 @@ import com.app.weather.dto.PrevisaoDto;
 import com.app.weather.entities.Previsao;
 import com.app.weather.enums.PrevisaoTempo;
 import com.app.weather.enums.PrevisaoTurno;
-import com.app.weather.repositories.PrevisaoRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 class PrevisaoRepositoryTest {
 
     @Autowired

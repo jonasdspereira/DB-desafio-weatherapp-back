@@ -10,24 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:latest
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_DB: previsao_teste
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     env:
       DEV_DB_URL: jdbc:postgresql://localhost:5432/previsao
-      TEST_DB_URL: jdbc:postgresql://localhost:5432/previsao-teste
+      TEST_DB_URL: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
       POSTGRES_USER: postgres
       POSTGRES_PWD: postgres
 
@@ -49,13 +34,6 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-
-      - name: Wait for PostgreSQL to be ready
-        run: |
-          until pg_isready -h localhost -p 5432; do
-            echo "Waiting for PostgreSQL to be ready..."
-            sleep 5
-          done
 
       - name: Build with Maven
         run: mvn clean install
