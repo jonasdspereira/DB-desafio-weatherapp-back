@@ -16,7 +16,7 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_DB: previsao_teste
+          POSTGRES_DB: previsao
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         options: >-
