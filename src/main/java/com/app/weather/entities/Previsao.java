@@ -21,6 +21,7 @@ public class Previsao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
+    /* Alguma coisa */
     private Long id;
 
     @NotEmpty(message = "O nome da cidade não pode estar vazio.")
