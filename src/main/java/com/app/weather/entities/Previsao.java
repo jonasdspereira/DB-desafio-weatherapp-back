@@ -23,8 +23,6 @@ public class Previsao {
     @Getter
     private Long id;
 
-
-
     @NotEmpty(message = "O nome da cidade não pode estar vazio.")
     @Size(min = 2, max = 30)
     private String nomeCidade;

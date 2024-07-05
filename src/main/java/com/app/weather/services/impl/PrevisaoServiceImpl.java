@@ -3,7 +3,6 @@ package com.app.weather.services.impl;
 import com.app.weather.dto.PrevisaoDto;
 import com.app.weather.entities.Previsao;
 import com.app.weather.exceptions.CamposDosDadosMeteorologicosNaoInformadosException;
-import com.app.weather.exceptions.DadosMeteorologicosNaoInformadosException;
 import com.app.weather.exceptions.PrevisaoNaoEncontradaException;
 import com.app.weather.mapper.PrevisaoMapper;
 import com.app.weather.repositories.PrevisaoRepository;

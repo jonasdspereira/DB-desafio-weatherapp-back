@@ -13,7 +13,6 @@ CREATE TABLE previsao (
     CONSTRAINT CHK_nome_cidade CHECK (CHAR_LENGTH(nome_cidade) >= 2 AND CHAR_LENGTH(nome_cidade) <= 30)
 );
 
--- Populando a tabela com 1000 registros de previsão fictícios com nomes de cidades reais e turno (manha, tarde, noite)
 INSERT INTO previsao (nome_cidade, data_cadastro, previsao_turno, previsao_tempo, temperatura_maxima, temperatura_minima, precipitacao, umidade, velocidade_do_vento)
 SELECT
     c.nome_cidade,
