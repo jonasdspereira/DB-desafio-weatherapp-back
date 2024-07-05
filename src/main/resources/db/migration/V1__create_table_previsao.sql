@@ -12,3 +12,33 @@ CREATE TABLE previsao (
     velocidade_do_vento INT NOT NULL,
     CONSTRAINT CHK_nome_cidade CHECK (CHAR_LENGTH(nome_cidade) >= 2 AND CHAR_LENGTH(nome_cidade) <= 30)
 );
+
+-- Populando a tabela com 1000 registros de previsão fictícios com nomes de cidades reais e turno (manha, tarde, noite)
+INSERT INTO previsao (nome_cidade, data_cadastro, previsao_turno, previsao_tempo, temperatura_maxima, temperatura_minima, precipitacao, umidade, velocidade_do_vento)
+SELECT
+    c.nome_cidade,
+    CURRENT_DATE - (random() * 365)::int AS data_cadastro,
+    CASE
+        WHEN random() < 0.33 THEN 'MANHA'
+        WHEN random() < 0.66 THEN 'TARDE'
+        ELSE 'NOITE'
+    END AS previsao_turno,
+    CASE
+        WHEN random() < 0.15 THEN 'PARCIALMENTE_NUBLADO'
+        WHEN random() < 0.25 THEN 'ENSOLARADO'
+        WHEN random() < 0.40 THEN 'CHUVOSO'
+        WHEN random() < 0.50 THEN 'VENTOSO'
+        WHEN random() < 0.60 THEN 'TEMPESTUOSO'
+        WHEN random() < 0.75 THEN 'NUBLADO'
+        WHEN random() < 0.90 THEN 'NEVADO'
+        ELSE 'LIMPO'
+    END AS previsao_tempo,
+    (random() * 40 + 20)::int AS temperatura_maxima,
+    (random() * 20)::int AS temperatura_minima,
+    (random() * 50)::int AS precipitacao,
+    (random() * 100)::int AS umidade,
+    (random() * 50)::int AS velocidade_do_vento
+FROM
+    (SELECT unnest(ARRAY['São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Salvador', 'Curitiba', 'Fortaleza', 'Recife', 'Manaus', 'Porto Alegre', 'Brasília']) AS nome_cidade) AS c
+CROSS JOIN generate_series(1, 100);
+
